@@ -2,6 +2,9 @@ package string_sum
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
 //use these errors as appropriate, wrapping them with fmt.Errorf function
@@ -23,5 +26,39 @@ var (
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
 func StringSum(input string) (output string, err error) {
-	return "", nil
+	input = strings.ReplaceAll(input, " ", "")
+
+	if len(input) == 0 {
+		return "", fmt.Errorf("%w", errorEmptyInput)
+	}
+	if operandsCount(input) != 2 {
+		return "", fmt.Errorf("%w", errorNotTwoOperands)
+	}
+
+	var firstOperand, secondOperand int
+
+	operPos := strings.LastIndex(input, "+")
+	if operPos == -1 {
+		operPos = strings.LastIndex(input, "-")
+	}
+
+	if firstOperand, err = strconv.Atoi(strings.TrimLeft(input[0:operPos], "+")); err != nil {
+		return "", fmt.Errorf("failed to convert %q: %w", input[0:operPos], err)
+	}
+	if secondOperand, err = strconv.Atoi(strings.TrimLeft(input[operPos:], "+")); err != nil {
+		return "", fmt.Errorf("failed to convert %q: %w", input[operPos:], err)
+	}
+
+	return strconv.Itoa(firstOperand + secondOperand), nil
+
+}
+
+func operandsCount(input string) (count int) {
+	input = strings.TrimLeft(input, "+")
+	input = strings.TrimLeft(input, "-")
+
+	for _, subStr := range strings.Split(input, "-") {
+		count += len(strings.Split(subStr, "+"))
+	}
+	return
 }
